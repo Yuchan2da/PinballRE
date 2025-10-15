@@ -5,37 +5,39 @@ using UnityEngine;
 namespace Pinball
 {
     [RequireComponent(typeof(GameState))]
+    // 점수 관리: IScoreAdder에서 발생한 점수를 GameState에 반영
     public class ScoreManager : MonoBehaviour
     {
         private GameState _gameState;
 
         private void Awake()
         {
-            _gameState = GetComponent<GameState>();
+            _gameState = GetComponent<GameState>(); // GameState 가져오기
 
-            _SubscribeToScoreAdders();
-            _ResetScoreOnRestart();
+            _SubscribeToScoreAdders(); // 점수 발생 객체 구독
+            _ResetScoreOnRestart();   // 게임 시작 시 점수 초기화
         }
 
         private void _SubscribeToScoreAdders()
         {
+            // IScoreAdder를 구현한 모든 MonoBehaviour 찾기
             IEnumerable<IScoreAdder> scoreAdders =
                 FindObjectsOfType<MonoBehaviour>()
                 .OfType<IScoreAdder>();
 
             foreach (var adder in scoreAdders)
-                adder.OnScoreAdded += _AddScore;
+                adder.OnScoreAdded += _AddScore; // 점수 이벤트 구독
         }
 
         private void _AddScore(int score)
         {
-            _gameState.score.value += score;
+            _gameState.score.value += score; // 점수 반영
         }
 
         private void _ResetScoreOnRestart()
         {
             EventManager.instance.OnGameStart += _ =>
-                _gameState.score.value = 0;
+                _gameState.score.value = 0; // 게임 시작 시 점수 초기화
         }
     }
 }

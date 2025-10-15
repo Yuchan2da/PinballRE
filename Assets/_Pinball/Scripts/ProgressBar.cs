@@ -2,12 +2,13 @@
 
 namespace Pinball
 {
+    // 발사 충전 게이지 등 진행률 표시용 UI
     public class ProgressBar : MonoBehaviour
     {
-        public Transform maskBar;
+        public Transform maskBar; // 진행률 표시 마스크
 
-        private float _defaultOffset;
-        private float _defaultScale;
+        private float _defaultOffset; // 초기 위치
+        private float _defaultScale;  // 초기 크기
 
         private float _offset
         {
@@ -15,7 +16,7 @@ namespace Pinball
             set
             {
                 var v = maskBar.localPosition;
-                v.y = value;
+                v.y = value;           // y 위치 변경
                 maskBar.localPosition = v;
             }
         }
@@ -26,24 +27,23 @@ namespace Pinball
             set
             {
                 var v = maskBar.localScale;
-                v.y = value;
+                v.y = value;           // y 스케일 변경
                 maskBar.localScale = v;
             }
         }
 
         private void Awake()
         {
-            Debug.Assert(maskBar != null);
-
-            _defaultOffset = _offset;
-            _defaultScale = _scale;
+            Debug.Assert(maskBar != null); // 마스크 연결 확인
+            _defaultOffset = _offset;       // 초기 위치 저장
+            _defaultScale = _scale;         // 초기 크기 저장
         }
 
-        // progress: [0; 1]
+        // progress: [0; 1] 범위
         public void SetProgress(float progress)
         {
-            _scale = _defaultScale * (1 - progress);
-            _offset = _defaultOffset + (_defaultScale / 2 * progress);
+            _scale = _defaultScale * (1 - progress);           // 스케일 조절
+            _offset = _defaultOffset + (_defaultScale / 2 * progress); // 위치 조절
         }
     }
 }

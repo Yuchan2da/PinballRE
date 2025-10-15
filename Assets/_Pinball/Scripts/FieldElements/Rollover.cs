@@ -3,19 +3,18 @@ using UnityEngine;
 
 namespace Pinball
 {
-    // An indicator which switches when a ball rolls over it.
     public class Rollover : MonoBehaviour
     {
-        public Color enabledColor;
+        public Color enabledColor; // 활성화 시 색상
+        public Action OnTriggered; // 트리거 시 호출 이벤트
 
-        public Action OnTriggered;
         public bool rolloverEnabled
         {
             get => _rolloverEnabled;
             set
             {
                 _rolloverEnabled = value;
-                _UpdateState();
+                _UpdateState(); // 상태 업데이트
             }
         }
 
@@ -25,25 +24,24 @@ namespace Pinball
 
         private void Awake()
         {
-            _material = GetComponent<MeshRenderer>().material;
-
-            _disabledColor = _material.color;
+            _material = GetComponent<MeshRenderer>().material; // 머티리얼 가져오기
+            _disabledColor = _material.color; // 기본 색상 저장
 
             EventManager.instance.OnGameStart += _ =>
-                rolloverEnabled = false;
+                rolloverEnabled = false; // 게임 시작 시 비활성화
         }
 
         private void OnTriggerEnter2D(Collider2D collider)
         {
-            rolloverEnabled = !rolloverEnabled;
+            rolloverEnabled = !rolloverEnabled; // 상태 반전
 
             if (OnTriggered != null)
-                OnTriggered();
+                OnTriggered(); // 이벤트 호출
         }
 
         private void _UpdateState()
         {
-            _material.color = rolloverEnabled ? enabledColor : _disabledColor;
+            _material.color = rolloverEnabled ? enabledColor : _disabledColor; // 색상 변경
         }
     }
 }
