@@ -15,13 +15,29 @@ namespace Pinball
 
         private void Awake()
         {
-            Debug.Assert(rollovers.Length > 0); // 비어있는지 확인
-            _inputProvider = MonoBehaviour.FindObjectOfType<InputProvider>(); // 입력 감지 컴포넌트 찾기
+            // 롤오버 배열이 비어있는지 확인
+            if (rollovers == null || rollovers.Length == 0)
+            {
+                Debug.LogError("RolloverGroup: rollovers 배열이 비어있습니다.");
+                return;
+            }
+
+            // DontSaveInEditor가 설정되지 않은 InputProvider만 필터링
+            _inputProvider = FindObjectsByType<InputProvider>(FindObjectsSortMode.None)
+                .FirstOrDefault(p => (p.hideFlags & HideFlags.DontSaveInEditor) == 0);
+
+            if (_inputProvider == null)
+            {
+                Debug.LogWarning("RolloverGroup: InputProvider를 찾을 수 없습니다.");
+            }
+
             _HandleGroupActivation(); // 롤오버 이벤트 연결
         }
 
         private void Update()
         {
+            if (_inputProvider == null) return;
+
             if (_inputProvider.IsSideDown(InputSide.Left))
                 _ShiftLeft(); // 왼쪽 쉬프트
 
@@ -31,12 +47,12 @@ namespace Pinball
 
         private void _ShiftLeft()
         {
-            bool first = rollovers[0].rolloverEnabled; // 첫 번째 상태 저장
+            bool first = rollovers[0].rolloverEnabled;
 
             for (int i = 0; i < rollovers.Length - 1; ++i)
-                rollovers[i].rolloverEnabled = rollovers[i + 1].rolloverEnabled; // 한 칸씩 이동
+                rollovers[i].rolloverEnabled = rollovers[i + 1].rolloverEnabled;
 
-            rollovers[rollovers.Length - 1].rolloverEnabled = first; // 마지막에 첫 상태 넣기
+            rollovers[rollovers.Length - 1].rolloverEnabled = first;
         }
 
         private void _ShiftRight()
@@ -48,30 +64,29 @@ namespace Pinball
         private void _HandleGroupActivation()
         {
             foreach (var rollover in rollovers)
-                rollover.OnTriggered += _HandleChildTrigger; // 롤오버 이벤트 등록
+                rollover.OnTriggered += _HandleChildTrigger;
         }
 
         private void _HandleChildTrigger()
         {
-            bool wholeGroupActive = rollovers.All(
-                rollover => rollover.rolloverEnabled); // 모두 켜졌는지 확인
+            bool wholeGroupActive = rollovers.All(r => r.rolloverEnabled);
 
             if (wholeGroupActive)
             {
-                _ResetGroup(); // 그룹 초기화
-                _AddScore(); // 점수 추가
+                _ResetGroup();
+                _AddScore();
             }
         }
 
         private void _ResetGroup()
         {
             foreach (var rollover in rollovers)
-                rollover.rolloverEnabled = false; // 모두 끄기
+                rollover.rolloverEnabled = false;
         }
 
         private void _AddScore()
         {
-            OnScoreAdded(scoreValue); // 점수 이벤트 호출
+            OnScoreAdded?.Invoke(scoreValue); // null 체크 포함
         }
     }
 }

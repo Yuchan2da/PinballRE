@@ -20,19 +20,21 @@ namespace Pinball
 
         private void _SubscribeToScoreAdders()
         {
-            // IScoreAdder를 구현한 모든 MonoBehaviour 찾기
+            // IScoreAdder를 구현한 모든 MonoBehaviour 찾기 (FindObjectsByType 사용)
             IEnumerable<IScoreAdder> scoreAdders =
-                FindObjectsOfType<MonoBehaviour>()
+                Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
                 .OfType<IScoreAdder>();
 
             foreach (var adder in scoreAdders)
                 adder.OnScoreAdded += _AddScore; // 점수 이벤트 구독
         }
+        
 
         private void _AddScore(int score)
-        {
-            _gameState.score.value += score; // 점수 반영
-        }
+    {
+    _gameState.score.value += score;
+    _gameState.TryUpdateMaxScore(); // ✅ 최대 점수 갱신
+    }
 
         private void _ResetScoreOnRestart()
         {
